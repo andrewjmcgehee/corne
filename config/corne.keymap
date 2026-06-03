@@ -51,7 +51,7 @@
         &kp LSHFT       &kp Z    &kp X    &kp C    &kp V    &kp B        &kp N              &kp M    &kp COMMA &kp DOT  &kp FSLH  &kp GRAVE
         &kp LCTRL &kp LALT &kp LCMD                                      &lt_bal NUM SPACE  &mo SYM  &mo NAV
       >;
-      label = "alpha";
+      display-name = "alpha";
     };
 
     num {
@@ -61,7 +61,7 @@
         &trans  &kp F11  &kp F12  &trans   &trans   &trans       &kp N0    &kp N1   &kp N2   &kp N3   &kp DOT    &trans
         &trans  &trans   &trans                                  &trans    &trans   &trans
       >;
-      label = "num";
+      display-name = "num";
     };
 
     sym {
@@ -71,7 +71,7 @@
         &trans  &kp SEMI   &kp SQT   &kp LT    &kp GRAVE  &kp EQUAL    &kp UNDER  &kp TILDE  &kp GT    &kp DQT    &kp COLON  &trans
         &trans  &trans     &trans                                      &trans     &trans     &trans
       >;
-      label = "sym";
+      display-name = "sym";
     };
 
     nav {
@@ -81,7 +81,7 @@
         &trans  &trans        &trans        &trans        &trans        &trans        &kp PG_DN  &kp LA(LEFT)  &kp LA(DOWN)  &kp LA(RIGHT)  &trans      &trans
         &trans  &trans        &trans                                                  &trans     &trans        &trans
       >;
-      label = "nav";
+      display-name = "nav";
     };
   };
 };

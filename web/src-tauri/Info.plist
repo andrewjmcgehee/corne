@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Required for CoreBluetooth access; without it macOS denies BLE silently
+       (no devices, no permission prompt). -->
+  <key>NSBluetoothAlwaysUsageDescription</key>
+  <string>zmkay connects to your keyboard over Bluetooth to read and update its keymap.</string>
+  <key>NSBluetoothPeripheralUsageDescription</key>
+  <string>zmkay connects to your keyboard over Bluetooth to read and update its keymap.</string>
+</dict>
+</plist>

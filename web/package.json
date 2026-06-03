@@ -1,0 +1,38 @@
+{
+  "name": "zmkay",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "A Vial-style web UI for ZMK: visualize, ergonomically re-bind, hotswap over Bluetooth, and git-sync your keymap.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -b --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.0",
+    "@zmkfirmware/zmk-studio-ts-client": "0.0.18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^4.5.7"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.2",
+    "@types/react": "^18.3.30",
+    "@types/react-dom": "^18.3.7",
+    "@types/w3c-web-serial": "^1.0.8",
+    "@types/web-bluetooth": "^0.0.20",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9"
+  }
+}

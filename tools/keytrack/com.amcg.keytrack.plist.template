@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reference template. install.sh generates the real plist with __HOME__ expanded. -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.amcg.keytrack</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__HOME__/.local/bin/keytrack</string>
+    </array>
+
+    <!-- start at login and keep it alive if it ever exits -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- back off restarts so a permission failure doesn't spin -->
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>StandardOutPath</key>
+    <string>__HOME__/.local/share/keytrack/keytrack.log</string>
+    <key>StandardErrorPath</key>
+    <string>__HOME__/.local/share/keytrack/keytrack.log</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

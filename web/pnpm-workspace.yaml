@@ -1,0 +1,4 @@
+allowBuilds:
+  '@zmkfirmware/zmk-studio-ts-client': false
+  esbuild: true
+  protobufjs: true

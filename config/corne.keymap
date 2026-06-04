@@ -78,7 +78,7 @@
       bindings = <
         &trans  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_CLR    &kp HOME   &kp LG(LEFT)  &kp LG(UP)    &kp LG(RIGHT)  &kp END     &trans
         &trans  &trans        &trans        &trans        &trans        &trans        &kp LEFT   &kp DOWN      &kp UP        &kp RIGHT      &kp PG_UP   &trans
-        &trans  &trans        &trans        &trans        &trans        &trans        &kp PG_DN  &kp LA(LEFT)  &kp LA(DOWN)  &kp LA(RIGHT)  &trans      &trans
+        &trans  &bootloader   &trans        &trans        &trans        &trans        &kp PG_DN  &kp LA(LEFT)  &kp LA(DOWN)  &kp LA(RIGHT)  &trans      &trans
         &trans  &trans        &trans                                                  &trans     &trans        &trans
       >;
       display-name = "nav";

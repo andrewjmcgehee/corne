@@ -1,4 +1,4 @@
-// Feature detection for the browser APIs Keeb relies on. None of these can be
+// Feature detection for the browser APIs zmkay relies on. None of these can be
 // polyfilled — they gate which transports / sync modes are available, so the UI
 // surfaces them honestly rather than failing mid-flow (see BrowserGuard).
 

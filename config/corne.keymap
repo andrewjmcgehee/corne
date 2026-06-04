@@ -39,6 +39,38 @@
       bindings = <&caps_word>;
       key-positions = <24 35>;
     };
+    left_shift_combo {
+      bindings = <&kp LSHFT>;
+      key-positions = <38 16>;
+    };
+    right_shift_combo {
+      bindings = <&kp LSHFT>;
+      key-positions = <39 19>;
+    };
+    left_gui_combo {
+      bindings = <&kp LGUI>;
+      key-positions = <38 15>;
+    };
+    right_gui_combo {
+      bindings = <&kp LGUI>;
+      key-positions = <39 20>;
+    };
+    left_alt_combo {
+      bindings = <&kp LALT>;
+      key-positions = <38 14>;
+    };
+    right_alt_combo {
+      bindings = <&kp LALT>;
+      key-positions = <39 21>;
+    };
+    left_control_combo {
+      bindings = <&kp LCTRL>;
+      key-positions = <38 13>;
+    };
+    right_control_combo {
+      bindings = <&kp LCTRL>;
+      key-positions = <39 22>;
+    };
   };
 
   keymap {

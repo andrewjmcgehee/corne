@@ -330,8 +330,9 @@ fn sdk_platform() -> (&'static str, &'static str) {
     (os, arch)
 }
 
-// ── build manager: cancelable, parallel builds + a 3-deep run history ────────
-const HISTORY_CAP: usize = 3;
+// ── build manager: cancelable, parallel builds + a run history ───────────────
+// How many recent build runs to keep (with their logs). Bump freely.
+const HISTORY_CAP: usize = 10;
 
 // A build run as the UI sees it: status + per-half logs (for debugging) + the
 // produced .uf2 paths. Clonable so build_history() can hand back a snapshot.

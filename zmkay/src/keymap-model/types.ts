@@ -46,4 +46,9 @@ export interface KeymapDocument {
   definedBehaviors: string[];
   /** `#define NAME value` pairs (e.g. ALPHA -> 0, NUM -> 1). */
   defines: Map<string, string>;
+  /** Body spans (between the braces) of container nodes, for inserting new
+   *  children. Absent if the node doesn't exist yet. `root` is the `/ { … }`. */
+  combosSpan?: Span;
+  behaviorsSpan?: Span;
+  rootSpan?: Span;
 }

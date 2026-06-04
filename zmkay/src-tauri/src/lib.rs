@@ -4,6 +4,7 @@
 
 mod ble;
 mod build;
+mod config;
 mod flash;
 mod usb;
 
@@ -31,6 +32,8 @@ pub fn run() {
             build::unwatch_config,
             usb::usb_halves,
             usb::flash_half,
+            config::read_keymap,
+            config::write_keymap,
         ])
         .run(tauri::generate_context!())
         .expect("error while running zmkay");

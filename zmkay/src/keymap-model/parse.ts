@@ -246,7 +246,18 @@ export function parseKeymap(source: string): KeymapDocument {
     ? directChildren(nodes, behaviorsNode).map((c) => c.label ?? c.name)
     : [];
 
-  return { source, layers, combos, definedBehaviors, defines: parseDefines(source) };
+  const rootNode = mostSpecific(nodes, (n) => n.name === "/");
+
+  return {
+    source,
+    layers,
+    combos,
+    definedBehaviors,
+    defines: parseDefines(source),
+    combosSpan: combosNode?.bodySpan,
+    behaviorsSpan: behaviorsNode?.bodySpan,
+    rootSpan: rootNode?.bodySpan,
+  };
 }
 
 function parseCombo(src: string, child: Node): ParsedCombo {

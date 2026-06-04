@@ -3,12 +3,17 @@
 // bridged to JS as an RpcTransport.
 
 mod ble;
+mod build;
 mod flash;
+mod usb;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(ble::BleState::default())
+        .manage(std::sync::Arc::new(build::BuildManager::default()))
+        .manage(build::WatcherState::default())
         .invoke_handler(tauri::generate_handler![
             ble::ble_list,
             ble::ble_connect,
@@ -16,6 +21,16 @@ pub fn run() {
             ble::ble_disconnect,
             flash::bootloader_present,
             flash::flash_uf2,
+            build::toolchain_status,
+            build::bootstrap_toolchain,
+            build::build_firmware,
+            build::start_build,
+            build::cancel_build,
+            build::build_history,
+            build::watch_config,
+            build::unwatch_config,
+            usb::usb_halves,
+            usb::flash_half,
         ])
         .run(tauri::generate_context!())
         .expect("error while running zmkay");

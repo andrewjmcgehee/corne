@@ -2,12 +2,10 @@ manifest:
   remotes:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
-    - name: fork
-      url-base: https://github.com/andrewjmcgehee
   projects:
     - name: zmk
-      remote: fork
-      revision: ota-probe
+      remote: zmkfirmware
+      revision: v0.3
       import: app/west.yml
   self:
     path: config

@@ -4,7 +4,8 @@
 // we then detect the mounted volume and copy the firmware. No DFU tooling needed.
 
 use std::fs;
-use std::path::PathBuf;
+use std::io::Write;
+use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use tauri::{AppHandle, Emitter};
@@ -61,7 +62,17 @@ pub async fn flash_uf2(
     if !src.exists() {
         return Err(format!("Firmware file not found: {uf2_path}"));
     }
+    wait_and_copy(&app, &src, timeout_secs).await
+}
 
+// Poll for the bootloader volume, then byte-copy the .uf2 onto it. Shared by the
+// manual flash command and the one-click flash_half (which first 1200-touches the
+// half into DFU). Emits `flash://status` for the UI.
+pub async fn wait_and_copy(
+    app: &AppHandle,
+    src: &Path,
+    timeout_secs: u64,
+) -> Result<String, String> {
     let _ = app.emit("flash://status", "Waiting for bootloader…");
     let mut volume = None;
     for _ in 0..(timeout_secs * 2) {
@@ -78,17 +89,35 @@ pub async fn flash_uf2(
 
     let _ = app.emit("flash://status", "Bootloader found — copying firmware…");
     let dest = volume.join("CURRENT.UF2");
-    match fs::copy(&src, &dest) {
-        Ok(_) => Ok("Firmware copied — the half is rebooting.".to_string()),
-        Err(e) => {
-            // The board commonly reboots mid-final-write, surfacing an IO error
-            // even though the flash succeeded. If the volume is now gone, the
-            // bootloader accepted the image and rebooted.
-            if !volume.exists() {
-                Ok("Firmware flashed — the half rebooted.".to_string())
-            } else {
-                Err(format!("Copy failed: {e}"))
-            }
+    let copy = copy_bytes(src, &dest);
+
+    // The UF2 bootloader reboots the instant it has the image — usually mid-write
+    // — so the final write/flush often errors (ENOATTR, EIO, …) even though the
+    // firmware landed. The definitive success signal is the volume UNMOUNTING.
+    // Always wait for that before returning: it confirms the flash took, and it
+    // stops a follow-on flash of the other half from reusing this half's
+    // still-mounted (indistinguishable) bootloader volume.
+    let _ = app.emit("flash://status", "Verifying…");
+    for _ in 0..30 {
+        if !volume.exists() {
+            return Ok("Firmware flashed — the half rebooted.".to_string());
         }
+        tokio::time::sleep(Duration::from_millis(500)).await;
     }
+    match copy {
+        Ok(_) => Ok("Firmware copied — the half is rebooting.".to_string()),
+        Err(e) => Err(format!("Copy failed: {e}")),
+    }
+}
+
+// Plain byte copy — NOT std::fs::copy. On macOS fs::copy uses fcopyfile with
+// COPYFILE_ALL, which after writing the data tries to copy extended attributes
+// and fails with ENOATTR (os error 93) on the bootloader's FAT volume, even
+// though the firmware itself wrote fine. Copying just the bytes avoids that.
+fn copy_bytes(src: &Path, dest: &Path) -> std::io::Result<()> {
+    let mut reader = fs::File::open(src)?;
+    let mut writer = fs::File::create(dest)?;
+    std::io::copy(&mut reader, &mut writer)?;
+    writer.flush()?;
+    Ok(())
 }

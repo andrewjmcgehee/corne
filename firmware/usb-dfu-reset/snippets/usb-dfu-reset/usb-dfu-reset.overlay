@@ -1,0 +1,21 @@
+/*
+ * Copyright (c) 2026 zmkay
+ * SPDX-License-Identifier: MIT
+ *
+ * Adds a dedicated USB CDC-ACM port whose 1200bps touch triggers a reboot into
+ * the UF2 bootloader (see src/usb_dfu_reset.c). Present on both halves; on the
+ * peripheral this is the only USB function, on the central it sits alongside
+ * ZMK's HID + the studio RPC CDC.
+ */
+
+/ {
+    chosen {
+        zmkay,dfu-uart = &zmkay_dfu_cdc;
+    };
+};
+
+&zephyr_udc0 {
+    zmkay_dfu_cdc: zmkay_dfu_cdc {
+        compatible = "zephyr,cdc-acm-uart";
+    };
+};

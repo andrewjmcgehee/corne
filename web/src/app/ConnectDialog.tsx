@@ -1,8 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "../state/store";
 import { detectCapabilities } from "./capabilities";
 import { isTauri } from "../transport/tauri-ble";
 import { Modal } from "./Modal";
+import {
+  forgetDevice,
+  listKnownDevices,
+  type KnownDevice,
+} from "../state/device-storage";
 
 // The connection flow, in a modal. Native (Tauri) shows a BLE scan + device
 // list; the browser shows the Web Bluetooth / Web Serial choosers. Closes
@@ -28,12 +33,74 @@ export function ConnectDialog({ onClose }: { onClose: () => void }) {
     >
       {status === "connecting" ? (
         <Connecting />
-      ) : isTauri() ? (
-        <NativeConnect />
       ) : (
-        <WebConnect />
+        <div className="flex flex-col gap-4">
+          {isTauri() ? <NativeConnect /> : <WebConnect />}
+          <SavedKeyboards />
+        </div>
       )}
     </Modal>
+  );
+}
+
+// Manage the data zmkay has saved per keyboard (cached layout/keymap/behaviors
+// and the build config folder). "Forget this keyboard" wipes all of it — useful
+// after a structural firmware change, or to clear a keyboard you no longer use.
+function SavedKeyboards() {
+  const [devices, setDevices] = useState<KnownDevice[]>(() => listKnownDevices());
+  const [confirming, setConfirming] = useState<string | null>(null);
+
+  if (devices.length === 0) return null;
+
+  function forget(key: string) {
+    forgetDevice(key);
+    setConfirming(null);
+    setDevices(listKnownDevices());
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5 border-t border-zmkay-edge pt-3">
+      <span className="text-xs text-zmkay-muted">Saved keyboards</span>
+      <ul className="flex flex-col gap-1">
+        {devices.map((d) => (
+          <li
+            key={d.key}
+            className="flex items-center justify-between gap-3 px-2.5 py-1.5 rounded-md text-sm"
+          >
+            <span className="truncate text-zmkay-text">
+              {d.name || "Unknown keyboard"}
+            </span>
+            {confirming === d.key ? (
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span className="text-xs text-zmkay-muted">Forget?</span>
+                <button
+                  type="button"
+                  onClick={() => forget(d.key)}
+                  className="px-2 py-0.5 rounded text-xs bg-zmkay-bad/20 border border-zmkay-bad/50 text-zmkay-bad hover:bg-zmkay-bad/30"
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirming(null)}
+                  className="px-2 py-0.5 rounded text-xs text-zmkay-muted hover:text-zmkay-text"
+                >
+                  Cancel
+                </button>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirming(d.key)}
+                className="shrink-0 px-2 py-0.5 rounded text-xs text-zmkay-muted hover:text-zmkay-bad"
+              >
+                Forget this keyboard
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

@@ -14,6 +14,7 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
@@ -23,3 +24,12 @@ futures = "0.3"
 # encrypted system bond (the Studio characteristic requires encryption).
 bluest = "0.6"
 uuid = "1"
+# Config-folder watcher (debounced) that drives the auto-build pipeline.
+notify = "6"
+notify-debouncer-mini = "0.4"
+# USB serial enumeration (detect connected halves) + the 1200-baud DFU touch.
+serialport = "4"
+
+[target.'cfg(unix)'.dependencies]
+# kill(-pgid) so canceling a build takes down the whole west/cmake/ninja tree.
+libc = "0.2"

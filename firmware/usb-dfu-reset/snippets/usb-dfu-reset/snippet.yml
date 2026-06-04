@@ -1,0 +1,7 @@
+# Copyright (c) 2026 zmkay
+# SPDX-License-Identifier: MIT
+
+name: usb-dfu-reset
+append:
+  EXTRA_DTC_OVERLAY_FILE: usb-dfu-reset.overlay
+  EXTRA_CONF_FILE: usb-dfu-reset.conf

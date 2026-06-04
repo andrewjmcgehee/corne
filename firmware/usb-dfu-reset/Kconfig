@@ -1,0 +1,11 @@
+# Copyright (c) 2026 zmkay
+# SPDX-License-Identifier: MIT
+
+config ZMKAY_USB_DFU_RESET
+	bool "Reboot into the UF2 bootloader on a 1200bps touch of the DFU CDC port"
+	help
+	  Watches a USB CDC-ACM port for the host setting 1200 baud (the
+	  Arduino/Adafruit "1200bps touch"), then reboots into the nRF52
+	  UF2 bootloader (sys_reboot(RST_UF2)). Lets a host tool drive either
+	  Corne half into DFU over USB without a physical double-tap reset.
+	  Enabled by the usb-dfu-reset snippet.

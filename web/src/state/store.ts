@@ -26,6 +26,7 @@ import {
   loadCachedKeymap,
   saveCachedKeymap,
 } from "../rpc/behavior-cache";
+import { rememberDevice } from "./device-storage";
 
 export type ConnStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -117,6 +118,7 @@ export const useStore = create<ZmkayState>((set, get) => {
       );
       if (get().conn !== conn) return; // disconnected/replaced meanwhile
       set({ deviceName, lockState, keymap, behaviors, hasUnsaved });
+      rememberDevice(cacheKey, deviceName);
       saveCachedKeymap(cacheKey, keymap);
     } catch {
       // Keep the cached view; a failed background refresh isn't fatal.
@@ -188,6 +190,7 @@ export const useStore = create<ZmkayState>((set, get) => {
         hasUnsaved,
         activeLayer: 0,
       });
+      rememberDevice(cacheKey, deviceName);
       saveCachedLayouts(cacheKey, layouts);
       saveCachedKeymap(cacheKey, keymap);
     } catch (err) {

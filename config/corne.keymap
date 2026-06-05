@@ -97,10 +97,10 @@ HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
     compatible = "zmk,keymap";
     alpha {
       bindings = <
-        &kp TAB    &kp Q        &kp W       &kp E       &kp R        &kp T              &kp Y           &kp U        &kp I       &kp O       &kp P          &kp BSPC
-        &gresc     &hl LCTRL A  &hl LALT S  &hl LCMD D  &hl LSHFT F  &kp G              &kp H           &hr LSHFT J  &hr LCMD K  &hr LALT L  &hr LCTRL SQT  &kp ENTER
-        &kp LSHFT  &kp Z        &kp X       &kp C       &kp V        &kp B              &kp N           &kp M        &kp COMMA   &kp DOT     &kp FSLH       &kp LSHFT
-                                            &mo MEDIA   &mo NAV      &ltb NUM LA(BSPC)  &ltb SYM SPACE  &mo NAV      &mo MEDIA
+        &kp TAB    &kp Q  &kp W        &kp E       &kp R       &kp T              &kp Y           &kp U       &kp I       &kp O        &kp P     &kp BSPC
+        &gresc     &kp A  &hl LCTRL S  &hl LALT D  &hl LCMD F  &kp G              &kp H           &hr LCMD J  &hr LALT K  &hr LCTRL L  &kp SQT   &kp ENTER
+        &kp LSHFT  &kp Z  &kp X        &kp C       &kp V       &kp B              &kp N           &kp M       &kp COMMA   &kp DOT      &kp FSLH  &kp LSHFT
+                                       &mo MEDIA   &mo NAV     &ltb NUM LA(BSPC)  &ltb SYM SPACE  &mo NAV     &mo MEDIA
       >;
       label = "alpha";
     };

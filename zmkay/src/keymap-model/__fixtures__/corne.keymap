@@ -56,30 +56,30 @@
 
     num {
       bindings = <
-        &trans  &kp F1   &kp F2   &kp F3   &kp F4   &kp F5       &kp FSLH  &kp N7   &kp N8   &kp N9   &kp MINUS  &trans
-        &trans  &kp F6   &kp F7   &kp F8   &kp F9   &kp F10      &kp STAR  &kp N4   &kp N5   &kp N6   &kp PLUS   &trans
-        &trans  &kp F11  &kp F12  &trans   &trans   &trans       &kp N0    &kp N1   &kp N2   &kp N3   &kp DOT    &trans
-        &trans  &trans   &trans                                  &trans    &trans   &trans
+        ___  &kp F1   &kp F2   &kp F3   &kp F4   &kp F5       &kp FSLH  &kp N7   &kp N8   &kp N9   &kp MINUS  ___
+        ___  &kp F6   &kp F7   &kp F8   &kp F9   &kp F10      &kp STAR  &kp N4   &kp N5   &kp N6   &kp PLUS   ___
+        ___  &kp F11  &kp F12  ___   ___   ___       &kp N0    &kp N1   &kp N2   &kp N3   &kp DOT    ___
+        ___  ___   ___                                  ___    ___   ___
       >;
       label = "num";
     };
 
     sym {
       bindings = <
-        &trans  &kp QMARK  &kp AT    &kp HASH  &kp DLLR   &kp PRCT     &kp PIPE   &kp STAR   &kp AMPS  &kp CARET  &kp EXCL   &trans
-        &trans  &kp MINUS  &kp FSLH  &kp LBRC  &kp LPAR   &kp LBKT     &kp RBKT   &kp RPAR   &kp RBRC  &kp BSLH   &kp PLUS   &trans
-        &trans  &kp SEMI   &kp SQT   &kp LT    &kp GRAVE  &kp EQUAL    &kp UNDER  &kp TILDE  &kp GT    &kp DQT    &kp COLON  &trans
-        &trans  &trans     &trans                                      &trans     &trans     &trans
+        ___  &kp QMARK  &kp AT    &kp HASH  &kp DLLR   &kp PRCT     &kp PIPE   &kp STAR   &kp AMPS  &kp CARET  &kp EXCL   ___
+        ___  &kp MINUS  &kp FSLH  &kp LBRC  &kp LPAR   &kp LBKT     &kp RBKT   &kp RPAR   &kp RBRC  &kp BSLH   &kp PLUS   ___
+        ___  &kp SEMI   &kp SQT   &kp LT    &kp GRAVE  &kp EQUAL    &kp UNDER  &kp TILDE  &kp GT    &kp DQT    &kp COLON  ___
+        ___  ___     ___                                      ___     ___     ___
       >;
       label = "sym";
     };
 
     nav {
       bindings = <
-        &trans  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_CLR    &kp HOME   &kp LG(LEFT)  &kp LG(UP)    &kp LG(RIGHT)  &kp END     &trans
-        &trans  &trans        &trans        &trans        &trans        &trans        &kp LEFT   &kp DOWN      &kp UP        &kp RIGHT      &kp PG_UP   &trans
-        &trans  &trans        &trans        &trans        &trans        &trans        &kp PG_DN  &kp LA(LEFT)  &kp LA(DOWN)  &kp LA(RIGHT)  &trans      &trans
-        &trans  &trans        &trans                                                  &trans     &trans        &trans
+        ___  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_CLR    &kp HOME   &kp LG(LEFT)  &kp LG(UP)    &kp LG(RIGHT)  &kp END     ___
+        ___  ___        ___        ___        ___        ___        &kp LEFT   &kp DOWN      &kp UP        &kp RIGHT      &kp PG_UP   ___
+        ___  ___        ___        ___        ___        ___        &kp PG_DN  &kp LA(LEFT)  &kp LA(DOWN)  &kp LA(RIGHT)  ___      ___
+        ___  ___        ___                                                  ___     ___        ___
       >;
       label = "nav";
     };

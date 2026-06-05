@@ -15,16 +15,20 @@
 #define NAV   3
 #define MEDIA 4
 
-&lt {
-  flavor = "balanced";
-  tapping-term-ms = <150>;
-  quick-tap-ms = <120>;
-};
-
-HOME_ROW_MOD(hl, &kp, &kp, KEYS_R) // left home row mods; removed THUMBS compared to urob
-HOME_ROW_MOD(hr, &kp, &kp, KEYS_L) // right home row mods; removed THUMBS compared to urob
+HOME_ROW_MOD(hl, &kp, &kp, KEYS_R THUMBS) // left home row mods
+HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
 
 / {
+  behaviors {
+    ltb: layer_tap_balanced {
+      compatible = "zmk,behavior-hold-tap";
+      #binding-cells = <2>;
+      flavor = "balanced";
+      tapping-term-ms = <150>;
+      quick-tap-ms = <120>;
+      bindings = <&mo>, <&kp>;
+    };
+  };
   combos {
     compatible = "zmk,combos";
     caps {
@@ -93,10 +97,10 @@ HOME_ROW_MOD(hr, &kp, &kp, KEYS_L) // right home row mods; removed THUMBS compar
     compatible = "zmk,keymap";
     alpha {
       bindings = <
-        &kp TAB    &kp Q        &kp W       &kp E       &kp R        &kp T             &kp Y          &kp U        &kp I       &kp O       &kp P          &kp BSPC
-        &kp ESC    &hl LCTRL A  &hl LALT S  &hl LCMD D  &hl LSHFT F  &kp G             &kp H          &hr LSHFT J  &hr LCMD K  &hr LALT L  &hr LCTRL SQT  &kp ENTER
-        &kp GRAVE  &kp Z        &kp X       &kp C       &kp V        &kp B             &kp N          &kp M        &kp COMMA   &kp DOT     &kp FSLH       xxx
-                                            &mo MEDIA   &mo NAV      &lt NUM LA(BSPC)  &lt SYM SPACE  &mo NAV      &mo MEDIA
+        &kp TAB    &kp Q        &kp W       &kp E       &kp R        &kp T              &kp Y           &kp U        &kp I       &kp O       &kp P          &kp BSPC
+        &kp ESC    &hl LCTRL A  &hl LALT S  &hl LCMD D  &hl LSHFT F  &kp G              &kp H           &hr LSHFT J  &hr LCMD K  &hr LALT L  &hr LCTRL SQT  &kp ENTER
+        &kp GRAVE  &kp Z        &kp X       &kp C       &kp V        &kp B              &kp N           &kp M        &kp COMMA   &kp DOT     &kp FSLH       xxx
+                                            &mo MEDIA   &mo NAV      &ltb NUM LA(BSPC)  &ltb SYM SPACE  &mo NAV      &mo MEDIA
       >;
       label = "alpha";
     };

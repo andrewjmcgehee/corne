@@ -10,3 +10,8 @@ export function readKeymap(configDir: string): Promise<string> {
 export function writeKeymap(configDir: string, content: string): Promise<void> {
   return invoke("write_keymap", { configDir, content });
 }
+
+// Write the device-derived keymap to candidate.keymap; returns its path.
+export function writeCandidate(configDir: string, content: string): Promise<string> {
+  return invoke<string>("write_candidate", { configDir, content });
+}

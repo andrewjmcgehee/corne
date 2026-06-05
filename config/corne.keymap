@@ -105,20 +105,20 @@
 
     alpha {
       bindings = <
-        &kp TAB    &kp Q         &kp W              &kp E        &kp R         &kp T  &kp Y           &kp U         &kp I        &kp O         &kp P          &kp BSPC
-        &kp ESC    &hrm LCTRL A  &hrm LALT S        &hrm LGUI D  &hrm LSHFT F  &kp G  &kp H           &hrm LSHFT J  &hrm LGUI K  &hrm LALT L  &hrm LCTRL SQT  &kp ENTER
-        &kp GRAVE  &kp Z         &kp X              &kp C        &kp V         &kp B  &kp N           &kp M         &kp COMMA    &kp DOT       &kp FSLH       &kp GLOBE
-        &mo MEDIA  &mo NAV       &ltb NUM LA(BSPC)                                   &ltb SYM SPACE  &mo NAV        &mo MEDIA
+        &kp TAB    &kp Q         &kp W        &kp E        &kp R         &kp T              &kp Y           &kp U         &kp I        &kp O        &kp P           &kp BSPC
+        &kp ESC    &hrm LCTRL A  &hrm LALT S  &hrm LCMD D  &hrm LSHFT F  &kp G              &kp H           &hrm LSHFT J  &hrm LCMD K  &hrm LALT L  &hrm LCTRL SQT  &kp ENTER
+        &kp GRAVE  &kp Z         &kp X        &kp C        &kp V         &kp B              &kp N           &kp M         &kp COMMA    &kp DOT      &kp FSLH        &kp GLOBE
+                                              &mo MEDIA    &mo NAV       &ltb NUM LA(BSPC)  &ltb SYM SPACE  &mo NAV       &mo MEDIA
       >;
       label = "alpha";
     };
 
     num {
       bindings = <
-        &trans  &kp F1   &kp F2   &kp F3  &kp F4  &kp F5   &kp FSLH  &kp N7   &kp N8   &kp N9   &kp MINUS  &trans
-        &trans  &kp F6   &kp F7   &kp F8  &kp F9  &kp F10  &kp STAR  &kp N4   &kp N5   &kp N6   &kp PLUS   &trans
-        &trans  &kp F11  &kp F12  &none   &none   &none    &kp N0    &kp N1   &kp N2   &kp N3   &kp DOT    &trans
-        &trans  &trans   &trans                            &trans    &trans   &trans
+        &trans  &none  &kp F9  &kp F8  &kp F7  &none   &kp FSLH  &kp N7  &kp N8  &kp N9  &kp MINUS  &trans
+        &trans  &none  &kp F6  &kp F5  &kp F4  &none   &kp STAR  &kp N4  &kp N5  &kp N6  &kp PLUS   &trans
+        &trans  &none  &kp F3  &kp F2  &kp F1  &none   &kp N0    &kp N1  &kp N2  &kp N3  &kp DOT    &trans
+                               &trans  &trans  &trans  &trans    &trans  &trans
       >;
       label = "num";
     };

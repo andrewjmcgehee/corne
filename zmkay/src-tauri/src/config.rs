@@ -19,3 +19,12 @@ pub fn write_keymap(config_dir: String, content: String) -> Result<(), String> {
     let path = keymap_path(&config_dir);
     std::fs::write(&path, content).map_err(|e| format!("{}: {e}", path.display()))
 }
+
+// Write the device-derived keymap to candidate.keymap (kept separate from
+// corne.keymap to avoid clobbering the source while reconciliation is WIP).
+#[tauri::command]
+pub fn write_candidate(config_dir: String, content: String) -> Result<String, String> {
+    let path = PathBuf::from(&config_dir).join("candidate.keymap");
+    std::fs::write(&path, content).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(path.display().to_string())
+}

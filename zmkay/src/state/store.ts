@@ -26,7 +26,11 @@ import {
   loadCachedKeymap,
   saveCachedKeymap,
 } from "../rpc/behavior-cache";
-import { rememberDevice } from "./device-storage";
+import { rememberDevice, loadConfigDir } from "./device-storage";
+import { parseKeymap } from "../keymap-model/parse";
+import { emitCandidate } from "../keymap-model/from-live";
+import { readKeymap, writeCandidate } from "../transport/config";
+import { isTauri } from "../transport/tauri-ble";
 
 export type ConnStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -122,6 +126,25 @@ export const useStore = create<ZmkayState>((set, get) => {
       saveCachedKeymap(cacheKey, keymap);
     } catch {
       // Keep the cached view; a failed background refresh isn't fatal.
+    }
+  }
+
+  // After a save, render the device's current keymap back into candidate.keymap
+  // (formatted, overlaid on the source). Native-only and best-effort — never
+  // fails the save. Kept as candidate.keymap so it can't clobber the source.
+  async function writeCandidateFile() {
+    if (!isTauri()) return;
+    const { keymap, behaviors, cacheKey, layouts } = get();
+    if (!keymap) return;
+    const configDir = loadConfigDir(cacheKey);
+    if (!configDir) return;
+    try {
+      const sourceDoc = parseKeymap(await readKeymap(configDir));
+      const keys = layouts?.layouts[layouts.activeLayoutIndex]?.keys;
+      await writeCandidate(configDir, emitCandidate(keymap, behaviors, sourceDoc, keys));
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[zmkay] candidate.keymap generation failed:", e);
     }
   }
 
@@ -353,6 +376,8 @@ export const useStore = create<ZmkayState>((set, get) => {
       if (!conn) return;
       await rpc.saveChanges(conn);
       set({ hasUnsaved: false });
+      // Mirror the saved device state to candidate.keymap (best-effort).
+      void writeCandidateFile();
     },
 
     discard: async () => {

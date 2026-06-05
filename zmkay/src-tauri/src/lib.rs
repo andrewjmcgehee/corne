@@ -34,6 +34,7 @@ pub fn run() {
             usb::flash_half,
             config::read_keymap,
             config::write_keymap,
+            config::write_candidate,
         ])
         .run(tauri::generate_context!())
         .expect("error while running zmkay");

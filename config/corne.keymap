@@ -32,13 +32,13 @@ HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
   combos {
     compatible = "zmk,combos";
     caps {
-      bindings = <&kp CAPS>;
-      key-positions = <16 19>;
+      bindings = <&caps_word>;
+      key-positions = <LM1 RM1>;
     };
     raycast {
       timeout-ms = <80>;
       bindings = <&kp LG(SPACE)>;
-      key-positions = <38 39>;
+      key-positions = <LH0 RH0>;
     };
   };
   macros {
@@ -98,8 +98,8 @@ HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
     alpha {
       bindings = <
         &kp TAB    &kp Q        &kp W       &kp E       &kp R        &kp T              &kp Y           &kp U        &kp I       &kp O       &kp P          &kp BSPC
-        &kp ESC    &hl LCTRL A  &hl LALT S  &hl LCMD D  &hl LSHFT F  &kp G              &kp H           &hr LSHFT J  &hr LCMD K  &hr LALT L  &hr LCTRL SQT  &kp ENTER
-        &kp GRAVE  &kp Z        &kp X       &kp C       &kp V        &kp B              &kp N           &kp M        &kp COMMA   &kp DOT     &kp FSLH       xxx
+        &gresc     &hl LCTRL A  &hl LALT S  &hl LCMD D  &hl LSHFT F  &kp G              &kp H           &hr LSHFT J  &hr LCMD K  &hr LALT L  &hr LCTRL SQT  &kp ENTER
+        &kp LSHFT  &kp Z        &kp X       &kp C       &kp V        &kp B              &kp N           &kp M        &kp COMMA   &kp DOT     &kp FSLH       &kp LSHFT
                                             &mo MEDIA   &mo NAV      &ltb NUM LA(BSPC)  &ltb SYM SPACE  &mo NAV      &mo MEDIA
       >;
       label = "alpha";

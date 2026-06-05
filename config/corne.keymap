@@ -136,7 +136,7 @@
     nav {
       bindings = <
         &trans  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_CLR  &none     &app1                 &app2                  &app3                  &app4  &trans
-        &trans  &tm1          &tm2          &tm3          &tm4          &none       &kp LEFT  &kp DOWN              &kp UP                 &kp RIGHT              &none  &trans
+        &trans  &tm4          &tm3          &tm2          &tm1          &none       &kp LEFT  &kp DOWN              &kp UP                 &kp RIGHT              &none  &trans
         &trans  &none         &none         &tmprev       &tmnext       &none       &none     &kp LG(LA(LC(LEFT)))  &kp LG(LA(LC(ENTER)))  &kp LG(LA(LC(RIGHT)))  &none  &trans
         &trans  &trans        &trans                                                &trans    &trans                &trans
       >;

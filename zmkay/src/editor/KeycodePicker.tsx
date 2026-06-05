@@ -1,9 +1,26 @@
-import { useMemo, useState } from "react";
-import { searchKeys, keyByUsage, type KeyDef } from "../keymap-model/keycodes";
-import { usageLabel } from "../keymap-model/keycodes";
+import { useEffect, useMemo, useState } from "react";
+import {
+  searchKeys,
+  keyByUsage,
+  splitUsage,
+  usageLabel,
+  type KeyDef,
+} from "../keymap-model/keycodes";
 
-// Search-driven keycode chooser. Used for &kp and for any behavior parameter
-// that takes a HID usage. Calls onPick with the chosen keycode's full usage.
+// Modifier chips — same bit layout as the rest of the app (top byte of a ZMK
+// keycode) and as QuickBind's chord folding. Left-side mods; ZMK collapses
+// L/R for implicit modifiers anyway (e.g. LA() vs RA() both AltGr a keycode).
+const MOD_CHIPS: Array<[string, number, string]> = [
+  ["⌃", 0x01, "Ctrl"],
+  ["⇧", 0x02, "Shift"],
+  ["⌥", 0x04, "Alt"],
+  ["⌘", 0x08, "Cmd"],
+];
+
+// Search-driven keycode chooser with modifier toggles. Used for &kp and for any
+// behavior parameter that takes a HID usage. The picked base plus the toggled
+// modifiers fold into one usage (e.g. Alt + BSPC -> LA(BSPC)), so modified
+// keycodes are reachable here, not just in QuickBind.
 export function KeycodePicker({
   value,
   onPick,
@@ -17,25 +34,78 @@ export function KeycodePicker({
 }) {
   const [query, setQuery] = useState("");
   const [highlight, setHighlight] = useState(0);
+  // The chosen base usage (page+id, no mods) and the active modifier byte. Seeded
+  // from `value` and kept in sync if the parent changes it.
+  const [base, setBase] = useState(() => (value !== undefined ? splitUsage(value).base : 0));
+  const [mods, setMods] = useState(() => (value !== undefined ? splitUsage(value).mods : 0));
+
+  useEffect(() => {
+    if (value !== undefined) {
+      const s = splitUsage(value);
+      setBase(s.base);
+      setMods(s.mods);
+    }
+  }, [value]);
+
   const results = useMemo(
     () => (query.trim() ? searchKeys(query).slice(0, 8) : []),
     [query],
   );
 
+  const emit = (b: number, m: number) => onPick(((b & 0x00ffffff) | ((m & 0xff) << 24)) >>> 0);
+
   const pick = (def: KeyDef) => {
-    onPick(def.usage);
+    const s = splitUsage(def.usage);
+    // Keep any modifiers the user already toggled, and add the def's own (e.g. a
+    // shifted symbol like * carries Shift).
+    const m = mods | s.mods;
+    setBase(s.base);
+    setMods(m);
+    emit(s.base, m);
     setQuery("");
   };
 
+  const toggleMod = (bit: number) => {
+    const m = mods ^ bit;
+    setMods(m);
+    if (base !== 0) emit(base, m); // only meaningful once a base key is chosen
+  };
+
+  const combined = ((base & 0x00ffffff) | ((mods & 0xff) << 24)) >>> 0;
+
   return (
     <div>
-      {value !== undefined && !query && (
+      {base !== 0 && (
         <div className="text-xs text-zmkay-muted mb-1">
           current:{" "}
-          <span className="font-mono text-zmkay-text">{usageLabel(value)}</span>
-          {keyByUsage(value) && ` (${keyByUsage(value)!.name})`}
+          <span className="font-mono text-zmkay-text">{usageLabel(combined)}</span>
+          {keyByUsage(combined) && ` (${keyByUsage(combined)!.name})`}
         </div>
       )}
+
+      <div className="flex items-center gap-1 mb-1.5">
+        <span className="text-xs text-zmkay-muted mr-1">mods</span>
+        {MOD_CHIPS.map(([glyph, bit, title]) => {
+          const on = (mods & bit) !== 0;
+          return (
+            <button
+              key={bit}
+              type="button"
+              title={title}
+              onClick={() => toggleMod(bit)}
+              className={[
+                "w-7 h-7 rounded-md border text-sm",
+                on
+                  ? "border-zmkay-accent bg-zmkay-accent/25 text-zmkay-text"
+                  : "border-zmkay-edge bg-zmkay-panel text-zmkay-muted hover:text-zmkay-text",
+              ].join(" ")}
+            >
+              {glyph}
+            </button>
+          );
+        })}
+      </div>
+
       <input
         autoFocus={autoFocus}
         value={query}

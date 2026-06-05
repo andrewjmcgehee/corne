@@ -5,13 +5,14 @@ import { parseKeymap } from "./parse";
 import { parseBindings } from "./parse";
 import { replaceBinding, serialize, bindingText } from "./emit";
 
-// The real keymap from the firmware repo (../../config/corne.keymap from web/).
+// A self-contained baseline keymap fixture (NOT the user's live config, which
+// changes as combos/behaviors are added through the app).
 const KEYMAP_PATH = fileURLToPath(
-  new URL("../../../config/corne.keymap", import.meta.url),
+  new URL("./__fixtures__/corne.keymap", import.meta.url),
 );
 const source = readFileSync(KEYMAP_PATH, "utf8");
 
-describe("parseKeymap on the real corne.keymap", () => {
+describe("parseKeymap on the corne.keymap fixture", () => {
   const doc = parseKeymap(source);
 
   it("finds all four layers in order", () => {

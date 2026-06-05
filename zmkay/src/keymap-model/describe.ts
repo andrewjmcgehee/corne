@@ -97,6 +97,13 @@ export function describeBinding(
     return { main: "✗", title: "none (disabled)" };
   }
 
+  // Bluetooth is not a hold-tap: param1 is the command (BT_*_CMD) and param2 is
+  // the profile. The generic two-param path would show the command value (3 for
+  // every BT_SEL), so decode it explicitly into "BT <profile>" / "BT CLR" / etc.
+  if (/bluetooth/i.test(display)) {
+    return describeBluetooth(binding.param1, binding.param2);
+  }
+
   const badge = badgeFor(display);
   const set = details?.metadata?.[0];
   const k1 = paramKind(set?.param1?.[0]);
@@ -132,6 +139,26 @@ export function describeBinding(
     badge: badge ? `${badge} ${hold}` : hold,
     title: `${display}: hold ${hold}, tap ${tap}`,
   };
+}
+
+// ZMK bt command values (dt-bindings/zmk/bt.h): param1 = command, param2 = profile.
+function describeBluetooth(cmd: number, profile: number): BindingLabel {
+  switch (cmd) {
+    case 3: // BT_SEL_CMD
+      return { main: String(profile), badge: "BT", title: `Bluetooth: select profile ${profile}` };
+    case 0: // BT_CLR_CMD
+      return { main: "CLR", badge: "BT", title: "Bluetooth: clear current profile" };
+    case 4: // BT_CLR_ALL_CMD
+      return { main: "CLR⁺", badge: "BT", title: "Bluetooth: clear all profiles" };
+    case 1: // BT_NXT_CMD
+      return { main: "▶", badge: "BT", title: "Bluetooth: next profile" };
+    case 2: // BT_PRV_CMD
+      return { main: "◀", badge: "BT", title: "Bluetooth: previous profile" };
+    case 5: // BT_DISC_CMD
+      return { main: `DC${profile}`, badge: "BT", title: `Bluetooth: disconnect profile ${profile}` };
+    default:
+      return { main: String(cmd), badge: "BT", title: "Bluetooth" };
+  }
 }
 
 function badgeFor(display: string): string | undefined {

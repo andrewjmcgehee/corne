@@ -12,23 +12,24 @@
 #define NUM   1
 #define SYM   2
 #define NAV   3
+#define MEDIA 4
 
 / {
   behaviors {
-    hm: homerow_shift_esc {
+    hrm: homerow_mods {
       compatible = "zmk,behavior-hold-tap";
       #binding-cells = <2>;
       flavor = "tap-preferred";
-      tapping-term-ms = <175>;
-      quick-tap-ms = <150>;
+      tapping-term-ms = <150>;
+      quick-tap-ms = <0>;
       bindings = <&kp>, <&kp>;
     };
-    lt_bal: layer_tap_balanced {
+    ltb: layer_tap_balanced {
       compatible = "zmk,behavior-hold-tap";
       #binding-cells = <2>;
       flavor = "balanced";
-      tapping-term-ms = <175>;
-      quick-tap-ms = <150>;
+      tapping-term-ms = <150>;
+      quick-tap-ms = <120>;
       bindings = <&mo>, <&kp>;
     };
   };
@@ -39,37 +40,63 @@
       bindings = <&caps_word>;
       key-positions = <24 35>;
     };
-    left_shift_combo {
-      bindings = <&kp LSHFT>;
-      key-positions = <38 16>;
+    raycast {
+      timeout-ms = <80>;
+      bindings = <&kp LG(SPACE)>;
+      key-positions = <38 39>;
     };
-    right_shift_combo {
-      bindings = <&kp LSHFT>;
-      key-positions = <39 19>;
+  };
+
+  macros {
+    tm1: tm1 {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_tap &kp GRAVE &kp N1>;
     };
-    left_gui_combo {
-      bindings = <&kp LGUI>;
-      key-positions = <38 15>;
+    tm2: tm2 {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_tap &kp GRAVE &kp N2>;
     };
-    right_gui_combo {
-      bindings = <&kp LGUI>;
-      key-positions = <39 20>;
+    tm3: tm3 {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_tap &kp GRAVE &kp N3>;
     };
-    left_alt_combo {
-      bindings = <&kp LALT>;
-      key-positions = <38 14>;
+    tm4: tm4 {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_tap &kp GRAVE &kp N4>;
     };
-    right_alt_combo {
-      bindings = <&kp LALT>;
-      key-positions = <39 21>;
+    tmnext: tmnext {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_tap &kp GRAVE &kp N>;
     };
-    left_control_combo {
-      bindings = <&kp LCTRL>;
-      key-positions = <38 13>;
+    tmprev: tmprev {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_tap &kp GRAVE &kp P>;
     };
-    right_control_combo {
-      bindings = <&kp LCTRL>;
-      key-positions = <39 22>;
+    app1: app1 {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_press &kp LALT>, <&macro_tap &kp N1>, <&macro_release &kp LALT>;
+    };
+    app2: app2 {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_press &kp LALT>, <&macro_tap &kp N2>, <&macro_release &kp LALT>;
+    };
+    app3: app3 {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_press &kp LALT>, <&macro_tap &kp N3>, <&macro_release &kp LALT>;
+    };
+    app4: app4 {
+      compatible = "zmk,behavior-macro";
+      #binding-cells = <0>;
+      bindings = <&macro_press &kp LALT>, <&macro_tap &kp N4>, <&macro_release &kp LALT>;
     };
   };
 
@@ -78,42 +105,52 @@
 
     alpha {
       bindings = <
-        &kp TAB         &kp Q    &kp W    &kp E    &kp R    &kp T        &kp Y              &kp U    &kp I     &kp O    &kp P     &kp BSPC
-        &kp ESC         &kp A    &kp S    &kp D    &kp F    &kp G        &kp H              &kp J    &kp K     &kp L    &kp SQT   &kp ENTER
-        &kp LSHFT       &kp Z    &kp X    &kp C    &kp V    &kp B        &kp N              &kp M    &kp COMMA &kp DOT  &kp FSLH  &kp GRAVE
-        &kp LCTRL &kp LALT &kp LCMD                                      &lt_bal NUM SPACE  &mo SYM  &mo NAV
+        &kp TAB    &kp Q         &kp W              &kp E        &kp R         &kp T  &kp Y           &kp U         &kp I        &kp O         &kp P          &kp BSPC
+        &kp ESC    &hrm LCTRL A  &hrm LALT S        &hrm LGUI D  &hrm LSHFT F  &kp G  &kp H           &hrm LSHFT J  &hrm LGUI K  &hrm LALT L  &hrm LCTRL SQT  &kp ENTER
+        &kp GRAVE  &kp Z         &kp X              &kp C        &kp V         &kp B  &kp N           &kp M         &kp COMMA    &kp DOT       &kp FSLH       &kp GLOBE
+        &mo MEDIA  &mo NAV       &ltb NUM LA(BSPC)                                   &ltb SYM SPACE  &mo NAV        &mo MEDIA
       >;
       label = "alpha";
     };
 
     num {
       bindings = <
-        &trans  &kp F1   &kp F2   &kp F3   &kp F4   &kp F5       &kp FSLH  &kp N7   &kp N8   &kp N9   &kp MINUS  &trans
-        &trans  &kp F6   &kp F7   &kp F8   &kp F9   &kp F10      &kp STAR  &kp N4   &kp N5   &kp N6   &kp PLUS   &trans
-        &trans  &kp F11  &kp F12  &trans   &trans   &trans       &kp N0    &kp N1   &kp N2   &kp N3   &kp DOT    &trans
-        &trans  &trans   &trans                                  &trans    &trans   &trans
+        &trans  &kp F1   &kp F2   &kp F3  &kp F4  &kp F5   &kp FSLH  &kp N7   &kp N8   &kp N9   &kp MINUS  &trans
+        &trans  &kp F6   &kp F7   &kp F8  &kp F9  &kp F10  &kp STAR  &kp N4   &kp N5   &kp N6   &kp PLUS   &trans
+        &trans  &kp F11  &kp F12  &none   &none   &none    &kp N0    &kp N1   &kp N2   &kp N3   &kp DOT    &trans
+        &trans  &trans   &trans                            &trans    &trans   &trans
       >;
       label = "num";
     };
 
     sym {
       bindings = <
-        &trans  &kp QMARK  &kp AT    &kp HASH  &kp DLLR   &kp PRCT     &kp PIPE   &kp STAR   &kp AMPS  &kp CARET  &kp EXCL   &trans
-        &trans  &kp MINUS  &kp FSLH  &kp LBRC  &kp LPAR   &kp LBKT     &kp RBKT   &kp RPAR   &kp RBRC  &kp BSLH   &kp PLUS   &trans
-        &trans  &kp SEMI   &kp SQT   &kp LT    &kp GRAVE  &kp EQUAL    &kp UNDER  &kp TILDE  &kp GT    &kp DQT    &kp COLON  &trans
-        &trans  &trans     &trans                                      &trans     &trans     &trans
+        &trans  &kp QMARK  &kp AT    &kp HASH  &kp DLLR   &kp PRCT   &kp PIPE   &kp STAR   &kp AMPS  &kp CARET  &kp EXCL   &trans
+        &trans  &kp MINUS  &kp FSLH  &kp LBRC  &kp LPAR   &kp LBKT   &kp RBKT   &kp RPAR   &kp RBRC  &kp BSLH   &kp PLUS   &trans
+        &trans  &kp SEMI   &kp SQT   &kp LT    &kp EQUAL  &kp GRAVE  &kp TILDE  &kp UNDER  &kp GT    &kp DQT    &kp COLON  &trans
+        &trans  &trans     &trans                                    &trans     &trans     &trans
       >;
       label = "sym";
     };
 
     nav {
       bindings = <
-        &trans  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_CLR    &kp HOME   &kp LG(LEFT)  &kp LG(UP)    &kp LG(RIGHT)  &kp END     &trans
-        &trans  &trans        &trans        &trans        &trans        &trans        &kp LEFT   &kp DOWN      &kp UP        &kp RIGHT      &kp PG_UP   &trans
-        &trans  &trans        &trans        &trans        &trans        &trans        &kp PG_DN  &kp LA(LEFT)  &kp LA(DOWN)  &kp LA(RIGHT)  &trans      &trans
-        &trans  &trans        &trans                                                  &trans     &trans        &trans
+        &trans  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_CLR  &none     &app1                 &app2                  &app3                  &app4  &trans
+        &trans  &tm1          &tm2          &tm3          &tm4          &none       &kp LEFT  &kp DOWN              &kp UP                 &kp RIGHT              &none  &trans
+        &trans  &none         &none         &tmprev       &tmnext       &none       &none     &kp LG(LA(LC(LEFT)))  &kp LG(LA(LC(ENTER)))  &kp LG(LA(LC(RIGHT)))  &none  &trans
+        &trans  &trans        &trans                                                &trans    &trans                &trans
       >;
       label = "nav";
+    };
+
+    media {
+      bindings = <
+        &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &trans  &trans                          &trans  &trans  &trans
+      >;
+      label = "media";
     };
   };
 };

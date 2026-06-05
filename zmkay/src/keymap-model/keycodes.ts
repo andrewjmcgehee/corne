@@ -25,16 +25,24 @@ const MOD = {
   RGUI: 0x80,
 } as const;
 
-const MOD_LABELS: Array<[number, string]> = [
-  [MOD.LGUI, "⌘"],
-  [MOD.RGUI, "⌘"],
-  [MOD.LCTL, "⌃"],
-  [MOD.RCTL, "⌃"],
-  [MOD.LALT, "⌥"],
-  [MOD.RALT, "⌥"],
-  [MOD.LSFT, "⇧"],
-  [MOD.RSFT, "⇧"],
-];
+// Ctrl+Alt+Cmd (a "hyper" chord, Raycast-style) collapses to this single glyph.
+const HYPER_GLYPH = "✦";
+
+// Pretty prefix for a keycode's modifier byte, collapsing left/right variants. A
+// full Ctrl+Alt+Cmd chord renders as the hyper diamond (plus ⇧ if also held).
+function modPrefix(mods: number): string {
+  const ctrl = (mods & (MOD.LCTL | MOD.RCTL)) !== 0;
+  const shift = (mods & (MOD.LSFT | MOD.RSFT)) !== 0;
+  const alt = (mods & (MOD.LALT | MOD.RALT)) !== 0;
+  const gui = (mods & (MOD.LGUI | MOD.RGUI)) !== 0;
+  if (ctrl && alt && gui) return (shift ? "⇧" : "") + HYPER_GLYPH;
+  let out = "";
+  if (ctrl) out += "⌃";
+  if (alt) out += "⌥";
+  if (shift) out += "⇧";
+  if (gui) out += "⌘";
+  return out;
+}
 
 const kbd = (id: number) => (HID_KBD << 16) | id;
 const ls = (usage: number) => usage | (MOD.LSFT << 24);
@@ -123,6 +131,8 @@ const RAW: Array<Omit<KeyDef, "usage"> & { id?: number; usage?: number }> = [
   { name: "RSHFT", id: 0xe5, label: "⇧", group: "mods", aliases: ["RSHIFT"] },
   { name: "RALT", id: 0xe6, label: "⌥", group: "mods" },
   { name: "RCMD", id: 0xe7, label: "⌘", group: "mods", aliases: ["RGUI", "RWIN"] },
+  // macOS Globe / fn key — consumer page (AC Next Keyboard Layout Select).
+  { name: "GLOBE", usage: (HID_CONSUMER << 16) | 0x029d, label: "fn", group: "mods", aliases: ["FN"] },
   // shifted symbols (base usage + left shift)
   { name: "EXCL", usage: ls(kbd(0x1e)), label: "!", group: "symbols", aliases: ["BANG"] },
   { name: "AT", usage: ls(kbd(0x1f)), label: "@", group: "symbols" },
@@ -197,13 +207,11 @@ export function usageLabel(usage: number): string {
 
   const { mods, base } = splitUsage(usage);
   const baseDef = byUsage.get(base);
-  const modPrefix = MOD_LABELS.filter(([bit]) => mods & bit)
-    .map(([, l]) => l)
-    .join("");
+  const prefix = modPrefix(mods);
 
-  if (baseDef) return modPrefix + baseDef.label;
+  if (baseDef) return prefix + baseDef.label;
 
   const page = (base >>> 16) & 0xff;
   const id = base & 0xffff;
-  return `${modPrefix}0x${page.toString(16)}:${id.toString(16)}`;
+  return `${prefix}0x${page.toString(16)}:${id.toString(16)}`;
 }

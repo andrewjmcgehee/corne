@@ -2,6 +2,7 @@ import { create } from "zustand";
 import {
   buildHistory,
   cancelBuild,
+  onBuildLog,
   onBuildRun,
   startBuild,
   unwatchConfig,
@@ -10,9 +11,10 @@ import {
   type RunStatus,
 } from "../transport/build";
 
-// Tracks the managed auto-build pipeline: the last 3 runs (with per-half logs)
-// and a derived current status for the header chip. Backed by build.rs, which
-// owns the actual build/cancel/history; this store mirrors it for the UI.
+// Tracks the managed auto-build pipeline: recent runs (with per-half logs) and a
+// derived current status for the header pill. Backed by build.rs, which owns the
+// actual build/cancel/history. Run lifecycle (build://run) reconciles the whole
+// history; individual log lines (build://log) stream in live between those.
 
 type BuildState = {
   runs: RunRecord[];
@@ -34,12 +36,33 @@ export const useBuildStore = create<BuildState>((set, get) => ({
   watching: null,
   initialized: false,
 
-  // Listen for run lifecycle events and pull the full history (incl. logs) on
-  // each, so the drawer always reflects the latest. Called once at startup.
+  // Pull the full history on each run lifecycle event (start/finish/cancel) and
+  // stream individual log lines into the current run in between, so logs appear
+  // as they're produced rather than all at once. Called once at startup.
   init: async () => {
     if (get().initialized) return;
     set({ initialized: true });
     await onBuildRun(() => void get().refresh());
+    await onBuildLog((line) => {
+      // Route by the "[left] "/"[right] " prefix into the building run's log.
+      let half: "left_log" | "right_log";
+      let text: string;
+      if (line.startsWith("[left] ")) {
+        half = "left_log";
+        text = line.slice("[left] ".length);
+      } else if (line.startsWith("[right] ")) {
+        half = "right_log";
+        text = line.slice("[right] ".length);
+      } else {
+        return; // untagged (e.g. toolchain bootstrap) — not a per-half build line
+      }
+      set((s) => {
+        const cur = s.runs[0];
+        if (!cur || cur.status !== "building") return {};
+        const updated = { ...cur, [half]: [...cur[half], text] };
+        return { runs: [updated, ...s.runs.slice(1)] };
+      });
+    });
     await get().refresh();
   },
 

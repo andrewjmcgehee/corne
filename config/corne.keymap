@@ -97,10 +97,10 @@ HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
     compatible = "zmk,keymap";
     alpha {
       bindings = <
-        &kp TAB    &kp Q  &kp W        &kp E       &kp R       &kp T              &kp Y           &kp U       &kp I       &kp O        &kp P     &kp BSPC
-        &gresc     &kp A  &hl LCTRL S  &hl LALT D  &hl LCMD F  &kp G              &kp H           &hr LCMD J  &hr LALT K  &hr LCTRL L  &kp SQT   &kp ENTER
-        &kp LSHFT  &kp Z  &kp X        &kp C       &kp V       &kp B              &kp N           &kp M       &kp COMMA   &kp DOT      &kp FSLH  &kp LSHFT
-                                       &mo MEDIA   &mo NAV     &ltb NUM LA(BSPC)  &ltb SYM SPACE  &mo NAV     &mo MEDIA
+        &kp TAB    &kp Q        &kp W        &kp E       &kp R       &kp T              &kp Y           &kp U       &kp I       &kp O        &kp P           &kp BSPC
+        &gresc     &hl LSHFT A  &hl LCTRL S  &hl LALT D  &hl LCMD F  &kp G              &kp H           &hr LCMD J  &hr LALT K  &hr LCTRL L  &hr LSHFT SQT   &kp ENTER
+        &kp LSHFT  &kp Z        &kp X        &kp C       &kp V       &kp B              &kp N           &kp M       &kp COMMA   &kp DOT      &kp FSLH        &kp LSHFT
+                                             &mo MEDIA   &mo NAV     &ltb NUM LA(BSPC)  &ltb SYM SPACE  &mo NAV     &mo MEDIA
       >;
       label = "alpha";
     };
@@ -124,7 +124,7 @@ HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
     };
     nav {
       bindings = <
-        ___  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_CLR  xxx       &app1                 &app2                  &app3                  &app4  ___
+        ___  &bt BT_SEL 3  &bt BT_SEL 2  &bt BT_SEL 1  &bt BT_SEL 0  &bt BT_CLR  xxx       &app1                 &app2                  &app3                  &app4  ___
         ___  &tm4          &tm3          &tm2          &tm1          xxx         &kp LEFT  &kp DOWN              &kp UP                 &kp RIGHT              xxx    ___
         ___  xxx           xxx           &tmprev       &tmnext       xxx         xxx       &kp LG(LA(LC(LEFT)))  &kp LG(LA(LC(ENTER)))  &kp LG(LA(LC(RIGHT)))  xxx    ___
                                          ___           ___           ___         ___       ___                   ___

@@ -73,7 +73,6 @@ async fn ensure_adapter(state: &State<'_, BleState>) -> Result<Adapter, String> 
 #[tauri::command]
 pub async fn ble_list(state: State<'_, BleState>) -> Result<Vec<DeviceInfo>, String> {
     let adapter = ensure_adapter(&state).await?;
-
     // Keyboards currently connected to this Mac over the system bond.
     let hid = adapter
         .connected_devices_with_services(&[HID_SERVICE_UUID])
@@ -86,10 +85,9 @@ pub async fn ble_list(state: State<'_, BleState>) -> Result<Vec<DeviceInfo>, Str
         .await
         .unwrap_or_default();
     let studio_ids: HashSet<String> = studio.iter().map(device_id).collect();
-
     let mut known = HashMap::new();
     let mut out = Vec::new();
-    for d in hid.into_iter().chain(studio.into_iter()) {
+    for d in hid.into_iter().chain(studio) {
         let id = device_id(&d);
         if known.contains_key(&id) {
             continue;
@@ -117,7 +115,6 @@ pub async fn ble_connect(
     id: String,
 ) -> Result<DeviceInfo, String> {
     let adapter = ensure_adapter(&state).await?;
-
     // Tear down any prior session first. Reusing a stale connection/subscription
     // across reconnects can leave the device's indications un-rearmed (tx but no
     // rx), so we drop our central's link and re-subscribe fresh every time.
@@ -132,7 +129,6 @@ pub async fn ble_connect(
     if let Some(old) = stale {
         let _ = adapter.disconnect_device(&old).await;
     }
-
     let device = state
         .inner
         .lock()
@@ -141,14 +137,12 @@ pub async fn ble_connect(
         .get(&id)
         .cloned()
         .ok_or_else(|| "Device not in list — refresh and try again".to_string())?;
-
     // Ensure our central has a session to the (system-connected) peripheral.
     timeout(Duration::from_secs(20), adapter.connect_device(&device))
         .await
         .map_err(|_| "Timed out connecting".to_string())?
         .map_err(err)?;
     eprintln!("[ble] connected; discovering Studio service");
-
     let service = timeout(
         Duration::from_secs(20),
         device.discover_services_with_uuid(SERVICE_UUID),
@@ -159,7 +153,6 @@ pub async fn ble_connect(
     .into_iter()
     .next()
     .ok_or_else(|| "That device has no ZMK Studio service".to_string())?;
-
     let rpc = service
         .discover_characteristics_with_uuid(RPC_CHRC_UUID)
         .await
@@ -168,7 +161,6 @@ pub async fn ble_connect(
         .find(|c| c.uuid() == RPC_CHRC_UUID)
         .ok_or_else(|| "No Studio RPC characteristic".to_string())?;
     eprintln!("[ble] found RPC characteristic; enabling indications");
-
     // Pump indications to the JS readable stream. notify() enables the CCC and
     // returns a stream; the task owns a clone of the characteristic so the
     // stream's borrow stays valid for its lifetime. We signal `ready` only once
@@ -205,7 +197,6 @@ pub async fn ble_connect(
         eprintln!("[ble] indication stream ended");
         let _ = app_for_pump.emit("ble://disconnected", ());
     });
-
     // Block returning until indications are live (or fail fast).
     match timeout(Duration::from_secs(10), ready_rx).await {
         Ok(Ok(Ok(()))) => {}
@@ -215,7 +206,6 @@ pub async fn ble_connect(
             return Err("Timed out enabling indications".to_string());
         }
     }
-
     let name = device.name().unwrap_or_default();
     {
         let mut inner = state.inner.lock().await;
@@ -227,7 +217,6 @@ pub async fn ble_connect(
         inner.pump = Some(pump);
     }
     eprintln!("[ble] connect complete: {name}");
-
     Ok(DeviceInfo {
         id,
         name,
@@ -255,7 +244,11 @@ pub async fn ble_disconnect(state: State<'_, BleState>) -> Result<(), String> {
     let (pump, device, adapter) = {
         let mut inner = state.inner.lock().await;
         inner.rpc_char = None;
-        (inner.pump.take(), inner.device.take(), inner.adapter.clone())
+        (
+            inner.pump.take(),
+            inner.device.take(),
+            inner.adapter.clone(),
+        )
     };
     if let Some(p) = pump {
         p.abort();

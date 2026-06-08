@@ -124,27 +124,38 @@ function bodyText(src: string, n: Node): string {
 
 // Parse the content between `<` and `>` of a bindings property into individual
 // bindings, recording absolute source spans. `offset` is the absolute index of
-// the content's first character.
+// the content's first character. A binding starts at a `&` (e.g. `&kp A`) or at
+// the bare aliases `___`/`xxx` — the de-facto ZMK shorthands for `&trans`/`&none`
+// — so layers that use them still count their keys correctly.
 export function parseBindings(content: string, offset: number): ParsedBinding[] {
   const clean = blankComments(content);
   const bindings: ParsedBinding[] = [];
-  const amps: number[] = [];
-  for (let i = 0; i < clean.length; i++) {
-    if (clean[i] === "&") amps.push(i);
-  }
-  for (let a = 0; a < amps.length; a++) {
-    const start = amps[a];
-    const rawEnd = a + 1 < amps.length ? amps[a + 1] : clean.length;
+
+  // Binding starts: every `&`, plus standalone ___ / xxx tokens.
+  const starts: number[] = [];
+  const startRe = /&|(?<![A-Za-z0-9_])(?:___|xxx)(?![A-Za-z0-9_])/g;
+  for (let m = startRe.exec(clean); m; m = startRe.exec(clean)) starts.push(m.index);
+
+  for (let a = 0; a < starts.length; a++) {
+    const start = starts[a];
+    const rawEnd = a + 1 < starts.length ? starts[a + 1] : clean.length;
     const trimmed = content.slice(start, rawEnd).replace(/\s+$/, "");
-    const tokens = clean
-      .slice(start + 1, rawEnd)
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
-    const behavior = tokens.shift() ?? "";
+
+    let behavior: string;
+    let params: string[];
+    if (content[start] === "&") {
+      const tokens = clean.slice(start + 1, rawEnd).trim().split(/\s+/).filter(Boolean);
+      behavior = tokens.shift() ?? "";
+      params = tokens;
+    } else {
+      // Bare alias: expand to its semantic behavior (raw keeps the alias text).
+      behavior = trimmed === "___" ? "trans" : trimmed === "xxx" ? "none" : trimmed;
+      params = [];
+    }
+
     bindings.push({
       behavior,
-      params: tokens,
+      params,
       raw: trimmed,
       span: { start: offset + start, end: offset + start + trimmed.length },
     });

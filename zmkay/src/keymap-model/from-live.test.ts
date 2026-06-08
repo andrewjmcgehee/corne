@@ -69,6 +69,35 @@ describe("emitCandidate (device -> source)", () => {
     expect(s({ behaviorId: 5, param1: 0, param2: 0 })).toBe("&trans");
   });
 
+  it("preserves ___ / xxx aliases for unchanged trans/none keys", () => {
+    const src = `/ {
+  keymap {
+    compatible = "zmk,keymap";
+    base {
+      bindings = <
+        ___   &kp A   xxx
+      >;
+      label = "base";
+    };
+  };
+};
+`;
+    const beh = new Map<number, any>([
+      [1, { id: 1, displayName: "Key Press", metadata: [{ param1: [{ hidUsage: {} }], param2: [] }] }],
+      [5, { id: 5, displayName: "Transparent", metadata: [{ param1: [{ nil: {} }], param2: [] }] }],
+      [6, { id: 6, displayName: "None", metadata: [{ param1: [{ nil: {} }], param2: [] }] }],
+    ]);
+    const live: any = {
+      layers: [{ id: 0, name: "base", bindings: [
+        { behaviorId: 5, param1: 0, param2: 0 },
+        { behaviorId: 1, param1: keyByName("A")!.usage, param2: 0 },
+        { behaviorId: 6, param1: 0, param2: 0 },
+      ] }],
+    };
+    // Device matches source → file is left byte-for-byte (aliases kept).
+    expect(emitCandidate(live, beh, parseKeymap(src))).toBe(src);
+  });
+
   it("aligns columns of a changed multi-row layer", () => {
     const src = `/ {
   keymap {

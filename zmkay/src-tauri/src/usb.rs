@@ -61,6 +61,7 @@ pub async fn flash_half(
     uf2_path: String,
     timeout_secs: u64,
 ) -> Result<String, String> {
+    eprintln!("[flash] flash_half ports={ports:?} uf2={uf2_path}");
     let src = PathBuf::from(&uf2_path);
     if !src.exists() {
         return Err(format!("Firmware file not found: {uf2_path}"));
@@ -70,12 +71,19 @@ pub async fn flash_half(
     let ports2 = ports.clone();
     let _ = tauri::async_runtime::spawn_blocking(move || {
         for port in &ports2 {
-            let _ = touch_1200(port);
+            eprintln!("[flash] 1200-baud touch on {port}");
+            match touch_1200(port) {
+                Ok(()) => eprintln!("[flash] touched {port} ok"),
+                Err(e) => eprintln!("[flash] touch {port} failed: {e}"),
+            }
         }
     })
     .await;
 
-    crate::flash::wait_and_copy(&app, &src, timeout_secs).await
+    eprintln!("[flash] waiting for bootloader volume…");
+    let r = crate::flash::wait_and_copy(&app, &src, timeout_secs).await;
+    eprintln!("[flash] wait_and_copy -> {r:?}");
+    r
 }
 
 // The "1200bps touch": open the port at 1200 baud (issuing SET_LINE_CODING) and

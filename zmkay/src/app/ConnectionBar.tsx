@@ -13,8 +13,10 @@ export function ConnectionBar() {
   const disconnect = useStore((s) => s.disconnect);
   const save = useStore((s) => s.save);
   const discard = useStore((s) => s.discard);
+  const restoreStock = useStore((s) => s.restoreStock);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmStock, setConfirmStock] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
   );
@@ -81,6 +83,38 @@ export function ConnectionBar() {
         saveState === "saved" && (
           <span className="text-xs text-zmkay-good">Saved ✓</span>
         )
+      )}
+      {confirmStock ? (
+        <span className="flex items-center gap-1.5 text-xs">
+          <span className="text-zmkay-muted">Reset to flashed keymap?</span>
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmStock(false);
+              // On failure the store drops the stale link → bar shows Connect again.
+              void restoreStock().catch(() => {});
+            }}
+            className="px-2 py-0.5 rounded bg-zmkay-warn/20 border border-zmkay-warn/50 text-zmkay-warn hover:bg-zmkay-warn/30"
+          >
+            Yes
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmStock(false)}
+            className="px-2 py-0.5 rounded text-zmkay-muted hover:text-zmkay-text"
+          >
+            Cancel
+          </button>
+        </span>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setConfirmStock(true)}
+          title="Clear the keyboard's saved Studio settings so the flashed firmware's keymap takes effect"
+          className="px-2.5 py-1 rounded-md text-xs bg-zmkay-panel2 border border-zmkay-edge text-zmkay-muted hover:text-zmkay-text"
+        >
+          Restore stock
+        </button>
       )}
       <button
         type="button"

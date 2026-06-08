@@ -74,22 +74,27 @@ pub async fn wait_and_copy(
     timeout_secs: u64,
 ) -> Result<String, String> {
     let _ = app.emit("flash://status", "Waiting for bootloader…");
+    eprintln!("[flash] polling for bootloader volume (timeout {timeout_secs}s)…");
     let mut volume = None;
     for _ in 0..(timeout_secs * 2) {
         if let Some(v) = find_bootloader_volume() {
+            eprintln!("[flash] bootloader volume found: {}", v.display());
             volume = Some(v);
             break;
         }
         tokio::time::sleep(Duration::from_millis(500)).await;
     }
     let volume = volume.ok_or_else(|| {
+        eprintln!("[flash] timed out waiting for bootloader volume");
         "Timed out — put the half in bootloader mode (double-tap reset, or press a &bootloader key)"
             .to_string()
     })?;
 
     let _ = app.emit("flash://status", "Bootloader found — copying firmware…");
     let dest = volume.join("CURRENT.UF2");
+    eprintln!("[flash] copying {} -> {}", src.display(), dest.display());
     let copy = copy_bytes(src, &dest);
+    eprintln!("[flash] copy result: {copy:?}; waiting for unmount…");
 
     // The UF2 bootloader reboots the instant it has the image — usually mid-write
     // — so the final write/flush often errors (ENOATTR, EIO, …) even though the

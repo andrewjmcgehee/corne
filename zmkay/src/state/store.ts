@@ -79,6 +79,8 @@ interface ZmkayState {
   ) => Promise<void>;
   save: () => Promise<void>;
   discard: () => Promise<void>;
+  /** Clear the device's saved Studio settings so the flashed keymap wins. */
+  restoreStock: () => Promise<void>;
 }
 
 export const useStore = create<ZmkayState>((set, get) => {
@@ -158,6 +160,8 @@ export const useStore = create<ZmkayState>((set, get) => {
     });
     set({ cacheKey, allBehaviorsLoaded: false });
 
+    // eslint-disable-next-line no-console
+    console.log("[connect] finishConnect", cacheKey);
     const cachedLayouts = loadCachedLayouts(cacheKey);
     const cachedKeymap = loadCachedKeymap(cacheKey);
     if (cachedLayouts && cachedKeymap) {
@@ -166,6 +170,8 @@ export const useStore = create<ZmkayState>((set, get) => {
         cachedKeymap.layers.flatMap((l) => l.bindings.map((b) => b.behaviorId)),
       );
       if ([...usedIds].every((id) => behaviors.has(id))) {
+        // eslint-disable-next-line no-console
+        console.log("[connect] cache hit → rendering cached, refreshing live");
         set({
           conn,
           status: "connected",
@@ -183,6 +189,8 @@ export const useStore = create<ZmkayState>((set, get) => {
     }
 
     // Cold path: nothing usable cached. Fetch everything (with a hang guard).
+    // eslint-disable-next-line no-console
+    console.log("[connect] cold path: fetching device info + keymap…");
     try {
       const [deviceName, lockState, layouts, keymap, hasUnsaved] =
         await withTimeout(
@@ -216,7 +224,13 @@ export const useStore = create<ZmkayState>((set, get) => {
       rememberDevice(cacheKey, deviceName);
       saveCachedLayouts(cacheKey, layouts);
       saveCachedKeymap(cacheKey, keymap);
+      // eslint-disable-next-line no-console
+      console.log(
+        `[connect] cold path done → connected; layers=${keymap.layers.length}, layouts=${layouts.layouts.length}`,
+      );
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[connect] finishConnect failed:", err);
       set({ status: "error", error: describeError(err) });
     }
   }
@@ -386,6 +400,31 @@ export const useStore = create<ZmkayState>((set, get) => {
       await rpc.discardChanges(conn);
       const keymap = await rpc.getKeymap(conn);
       set({ keymap, hasUnsaved: false });
+    },
+
+    // "Restore Stock Settings": clear the device's saved Studio state so the
+    // keymap compiled into the flashed firmware (corne.keymap) takes effect.
+    // Called over a live BLE link (e.g. just before a USB flash), so no reconnect.
+    restoreStock: async () => {
+      const { conn } = get();
+      // eslint-disable-next-line no-console
+      console.log("[reset] restoreStock start, connected:", !!conn);
+      if (!conn) throw new Error("Not connected over Bluetooth.");
+      // Time-box it: call_rpc has no timeout, so a queued/unanswered request would
+      // otherwise hang the whole flow. 8s covers a slow in-flight getKeymap.
+      const t0 = performance.now();
+      await withTimeout(
+        rpc.resetSettings(conn),
+        8000,
+        "resetSettings timed out (the RPC didn't respond — the link may be busy or stale).",
+      );
+      // eslint-disable-next-line no-console
+      console.log(`[reset] resetSettings returned in ${Math.round(performance.now() - t0)}ms`);
+      try {
+        set({ keymap: await rpc.getKeymap(conn), hasUnsaved: false });
+      } catch {
+        // The reset may bounce the connection; cached view stays until reconnect.
+      }
     },
   };
 });

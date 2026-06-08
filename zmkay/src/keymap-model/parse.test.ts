@@ -116,4 +116,12 @@ describe("parseBindings unit", () => {
     expect(out[0].raw).toBe("&kp A");
     expect(out[1].params).toEqual(["NUM"]);
   });
+
+  it("treats ___ and xxx as &trans / &none bindings", () => {
+    const out = parseBindings("&kp A  ___  xxx  &mo NUM", 0);
+    expect(out).toHaveLength(4);
+    expect(out.map((b) => b.behavior)).toEqual(["kp", "trans", "none", "mo"]);
+    expect(out[1].raw).toBe("___");
+    expect(out[2].raw).toBe("xxx");
+  });
 });

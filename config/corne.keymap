@@ -4,16 +4,21 @@
  * SPDX-License-Identifier: MIT
  */
 
+#define ZMK_POINTING_DEFAULT_SCRL_VAL 20 
+
+#define BASE  0
+#define MATH  1
+#define CODE  2
+#define GOTO  3
+#define FUNC  4
+#define SNIP  5
+
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/pointing.h>
 #include "helpers.h"
 
-#define ALPHA 0
-#define NUM   1
-#define SYM   2
-#define NAV   3
-#define MEDIA 4
 
 HOME_ROW_MOD(hl, &kp, &kp, KEYS_R THUMBS) // left home row mods
 HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
@@ -32,113 +37,78 @@ HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
   combos {
     compatible = "zmk,combos";
     caps {
+      timeout-ms = <100>;
       bindings = <&caps_word>;
       key-positions = <LM1 RM1>;
     };
     raycast {
-      timeout-ms = <80>;
+      timeout-ms = <100>;
       bindings = <&kp LG(SPACE)>;
       key-positions = <LH0 RH0>;
     };
   };
   macros {
-    tm1: tm1 {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_tap &kp GRAVE &kp N1>;
-    };
-    tm2: tm2 {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_tap &kp GRAVE &kp N2>;
-    };
-    tm3: tm3 {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_tap &kp GRAVE &kp N3>;
-    };
-    tm4: tm4 {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_tap &kp GRAVE &kp N4>;
-    };
-    tmnext: tmnext {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_tap &kp GRAVE &kp N>;
-    };
-    tmprev: tmprev {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_tap &kp GRAVE &kp P>;
-    };
-    app1: app1 {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_press &kp LALT>, <&macro_tap &kp N1>, <&macro_release &kp LALT>;
-    };
-    app2: app2 {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_press &kp LALT>, <&macro_tap &kp N2>, <&macro_release &kp LALT>;
-    };
-    app3: app3 {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_press &kp LALT>, <&macro_tap &kp N3>, <&macro_release &kp LALT>;
-    };
-    app4: app4 {
-      compatible = "zmk,behavior-macro";
-      #binding-cells = <0>;
-      bindings = <&macro_press &kp LALT>, <&macro_tap &kp N4>, <&macro_release &kp LALT>;
+    tm: tm {
+      compatible = "zmk,behavior-macro-one-param";
+      #binding-cells = <1>;
+      bindings = <&macro_tap &kp GRAVE>, <&macro_param_1to1>, <&macro_tap &kp MACRO_PLACEHOLDER>;
     };
   };
   keymap {
     compatible = "zmk,keymap";
-    alpha {
+    base {
       bindings = <
-        &kp TAB    &kp Q        &kp W        &kp E       &kp R       &kp T              &kp Y           &kp U       &kp I       &kp O        &kp P           &kp BSPC
-        &gresc     &hl LSHFT A  &hl LCTRL S  &hl LALT D  &hl LCMD F  &kp G              &kp H           &hr LCMD J  &hr LALT K  &hr LCTRL L  &hr LSHFT SQT   &kp ENTER
-        &kp LSHFT  &kp Z        &kp X        &kp C       &kp V       &kp B              &kp N           &kp M       &kp COMMA   &kp DOT      &kp FSLH        &kp LSHFT
-                                             &mo MEDIA   &mo NAV     &ltb NUM LA(BSPC)  &ltb SYM SPACE  &mo NAV     &mo MEDIA
+        &kp TAB    &kp Q        &kp W        &kp E       &kp R       &kp T               &kp Y            &kp U       &kp I       &kp O        &kp P          &kp BSPC
+        &gresc     &hl LSHFT A  &hl LCTRL S  &hl LALT D  &hl LCMD F  &kp G               &kp H            &hr LCMD J  &hr LALT K  &hr LCTRL L  &hr LSHFT SQT  &kp ENTER
+        &kp LSHFT  &kp Z        &kp X        &kp C       &kp V       &kp B               &kp N            &kp M       &kp COMMA   &kp DOT      &kp FSLH       &kp LSHFT
+                                             &mo FUNC    &mo GOTO    &ltb MATH LA(BSPC)  &ltb CODE SPACE  &mo GOTO    &mo SNIP
       >;
-      label = "alpha";
+      label = "base";
     };
-    num {
+    math {
       bindings = <
-        ___  xxx  &kp F9  &kp F8  &kp F7  xxx   &kp FSLH  &kp N7  &kp N8  &kp N9  &kp MINUS  ___
-        ___  xxx  &kp F6  &kp F5  &kp F4  xxx   &kp STAR  &kp N4  &kp N5  &kp N6  &kp PLUS   ___
-        ___  xxx  &kp F3  &kp F2  &kp F1  xxx   &kp N0    &kp N1  &kp N2  &kp N3  &kp DOT    ___
-                          ___     ___     ___   ___       ___     ___
+        ___  &kp CARET &kp PRCNT  &kp LT     &kp GT    &kp EXCL   xxx     &kp N7  &kp N8  &kp N9  xxx  ___
+        ___  &kp FSLH  &kp STAR   &kp MINUS  &kp PLUS  &kp EQUAL  xxx     &kp N4  &kp N5  &kp N6  xxx  ___
+        ___  &kp PIPE  &kp AMPS   &kp COMMA  &kp DOT   &kp QMARK  &kp N0  &kp N1  &kp N2  &kp N3  xxx  ___
+                                  ___        ___       ___        ___     ___     ___
       >;
-      label = "num";
+      label = "math";
     };
-    sym {
+    code {
       bindings = <
-        ___  &kp QMARK  &kp AT    &kp HASH  &kp DLLR   &kp PRCNT  &kp PIPE   &kp STAR   &kp AMPS  &kp CARET  &kp EXCL   ___
-        ___  &kp MINUS  &kp FSLH  &kp LBRC  &kp LPAR   &kp LBKT   &kp RBKT   &kp RPAR   &kp RBRC  &kp BSLH   &kp PLUS   ___
-        ___  &kp SEMI   &kp SQT   &kp LT    &kp EQUAL  &kp GRAVE  &kp TILDE  &kp UNDER  &kp GT    &kp DQT    &kp COLON  ___
+        ___  &kp EXCL   &kp AT    &kp HASH  &kp DLLR   &kp PRCNT  &kp CARET  &kp AMPS   &kp STAR  &kp PIPE  &kp QMARK  ___
+        ___  &kp MINUS  &kp FSLH  &kp LBRC  &kp LPAR   &kp LBKT   &kp RBKT   &kp RPAR   &kp RBRC  &kp BSLH  &kp PLUS   ___
+        ___  &kp SEMI   &kp SQT   &kp LT    &kp EQUAL  &kp GRAVE  &kp TILDE  &kp UNDER  &kp GT    &kp DQT   &kp COLON  ___
                                   ___       ___        ___        ___        ___        ___
       >;
-      label = "sym";
+      label = "code";
     };
-    nav {
+    goto {
       bindings = <
-        ___  &bt BT_SEL 3  &bt BT_SEL 2  &bt BT_SEL 1  &bt BT_SEL 0  &bt BT_CLR  xxx       &app1                 &app2                  &app3                  &app4  ___
-        ___  &tm4          &tm3          &tm2          &tm1          xxx         &kp LEFT  &kp DOWN              &kp UP                 &kp RIGHT              xxx    ___
-        ___  xxx           xxx           &tmprev       &tmnext       xxx         xxx       &kp LG(LA(LC(LEFT)))  &kp LG(LA(LC(ENTER)))  &kp LG(LA(LC(RIGHT)))  xxx    ___
-                                         ___           ___           ___         ___       ___                   ___
+        ___  &tm N4  &tm N3  &tm N2  &tm N1  xxx  xxx       &kp LA(N1)            &kp LA(N2)             &kp LA(N3)             &kp LA(N4)      ___
+        ___  &tm N8  &tm N7  &tm N6  &tm N8  xxx  &kp LEFT  &kp DOWN              &kp UP                 &kp RIGHT              &msc SCRL_DOWN  ___
+        ___  xxx     xxx     &tm P   &tm N   xxx  xxx       &kp LG(LA(LC(LEFT)))  &kp LG(LA(LC(ENTER)))  &kp LG(LA(LC(RIGHT)))  &msc SCRL_UP    ___
+                             ___     ___     ___  ___       ___                   ___
       >;
-      label = "nav";
+      label = "goto";
     };
-    media {
+    func {
       bindings = <
-        ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___
-        ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___
-        ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___
+        ___  xxx           &kp C_SLEEP   &kp C_RESET   &kp C_PWR     xxx         xxx         &kp C_BRI_DN  &kp C_BRI_UP  xxx  xxx  ___     
+        ___  &bt BT_SEL 3  &bt BT_SEL 2  &bt BT_SEL 1  &bt BT_SEL 0  &bt BT_CLR  &kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  xxx  xxx  ___
+        ___  xxx           xxx           xxx           xxx           xxx         &kp C_PP    &kp C_PREV    &kp C_NEXT    xxx  xxx  ___
+                                         ___           ___           ___         ___  ___  ___
+      >;
+      label = "func";
+    };
+    snip {
+      bindings = <
+        ___  xxx  xxx  xxx  xxx  xxx  xxx  xxx  xxx  xxx  xxx  ___     
+        ___  xxx  xxx  xxx  xxx  xxx  xxx  xxx  xxx  xxx  xxx  ___
+        ___  xxx  xxx  xxx  xxx  xxx  xxx  xxx  xxx  xxx  xxx  ___
                        ___  ___  ___  ___  ___  ___
       >;
-      label = "media";
+      label = "snip";
     };
   };
 };

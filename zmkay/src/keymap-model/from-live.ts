@@ -55,6 +55,8 @@ type Ctx = {
   idToName: Map<number, string>;
   behaviors: Map<number, GetBehaviorDetailsResponse>;
   reverseDefines: Map<string, string>;
+  transAlias: string; // "&trans" or "___" if the source uses that shorthand
+  noneAlias: string; // "&none" or "xxx"
 };
 
 // Recover behaviorId -> devicetree name by majority vote across positions.
@@ -139,6 +141,8 @@ export function serializeLiveBinding(binding: BehaviorBinding, ctx: Ctx): string
   const id = binding.behaviorId;
   const name = ctx.idToName.get(id) ?? staticName(ctx.behaviors.get(id)?.displayName) ?? `unknown_${id}`;
   if (name === "bt") return `&bt ${btToken(binding.param1, binding.param2)}`;
+  if (name === "trans") return ctx.transAlias ?? "&trans";
+  if (name === "none") return ctx.noneAlias ?? "&none";
 
   const set = ctx.behaviors.get(id)?.metadata?.[0];
   const parts = [`&${name}`];
@@ -167,7 +171,16 @@ export function emitCandidate(
   for (const [name, val] of source.defines) {
     if (!reverseDefines.has(val)) reverseDefines.set(val, name);
   }
-  const ctx: Ctx = { idToName, behaviors, reverseDefines };
+  // Preserve the source's trans/none style (&trans vs the ___ shorthand).
+  let transAlias = "&trans";
+  let noneAlias = "&none";
+  for (const layer of source.layers) {
+    for (const b of layer.bindings) {
+      if (b.raw === "___") transAlias = "___";
+      else if (b.raw === "xxx") noneAlias = "xxx";
+    }
+  }
+  const ctx: Ctx = { idToName, behaviors, reverseDefines, transAlias, noneAlias };
 
   const edits: Array<{ span: Span; content: string }> = [];
   const n = Math.min(live.layers.length, source.layers.length);

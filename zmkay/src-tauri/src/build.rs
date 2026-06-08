@@ -462,6 +462,11 @@ impl BuildManager {
                 Err(e) => {
                     rec.status = "error".into();
                     rec.error = Some(e.clone());
+                    // Surface early failures (before any half logged) in the panes too.
+                    if rec.left_log.is_empty() && rec.right_log.is_empty() {
+                        rec.left_log.push(format!("ERROR: {e}"));
+                        rec.right_log.push(format!("ERROR: {e}"));
+                    }
                 }
             }
         }
@@ -567,8 +572,63 @@ pub async fn build_firmware(
     .map_err(|e| e.to_string())?
 }
 
-// Build both halves into the workspace build dir. Mirrors build.yaml plus the
-// usb-dfu-reset module/snippet on both halves; studio-rpc-usb-uart on the left.
+// One board+shield+snippet combo from build.yaml's `include:` matrix.
+#[derive(serde::Deserialize)]
+struct BuildEntry {
+    board: String,
+    #[serde(default)]
+    shield: String,
+    #[serde(default)]
+    snippet: String,
+}
+
+#[derive(serde::Deserialize)]
+struct BuildYaml {
+    #[serde(default)]
+    include: Vec<BuildEntry>,
+}
+
+fn read_build_entries(config: &Path) -> Result<Vec<BuildEntry>, String> {
+    // ZMK puts build.yaml at the repo root (sibling of config/), but tolerate it
+    // inside config/ too.
+    let root = config.parent().map(|p| p.join("build.yaml"));
+    let path = match root {
+        Some(p) if p.exists() => p,
+        _ => config.join("build.yaml"),
+    };
+    let text = std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let parsed: BuildYaml = serde_yaml::from_str(&text).map_err(|e| format!("build.yaml: {e}"))?;
+    Ok(parsed.include)
+}
+
+// snippet string from build.yaml + zmkay's own usb-dfu-reset, as -S args.
+fn snippets_for(snippet: &str) -> Vec<&str> {
+    let mut v: Vec<&str> = snippet.split_whitespace().collect();
+    v.push("usb-dfu-reset");
+    v
+}
+
+// If the user's config/west.yml differs from the workspace's, copy it in and run
+// `west update` so any extra modules/repos it references (e.g. a custom nice_view
+// shield) get cloned before building.
+fn sync_manifest(app: &AppHandle, config: &Path, ws: &Path) -> Result<(), String> {
+    let user = config.join("west.yml");
+    let Ok(user_text) = std::fs::read_to_string(&user) else {
+        return Ok(()); // no config/west.yml — keep the provisioned manifest
+    };
+    let ws_manifest = ws.join("config").join("west.yml");
+    if std::fs::read_to_string(&ws_manifest).unwrap_or_default().trim() == user_text.trim() {
+        return Ok(());
+    }
+    status(app, "west.yml changed — fetching modules…");
+    std::fs::write(&ws_manifest, &user_text).map_err(|e| e.to_string())?;
+    run_step(app, ws, &west_bin(), &["update"], &[])?;
+    run_step(app, ws, &west_bin(), &["zephyr-export"], &[])?;
+    Ok(())
+}
+
+// Build both halves into the workspace build dir, driven by the user's build.yaml
+// (board/shield/snippet) and west.yml, plus zmkay's usb-dfu-reset module/snippet.
 fn managed_build(
     manager: &Arc<BuildManager>,
     app: &AppHandle,
@@ -584,6 +644,21 @@ fn managed_build(
     }
 
     let ws = workspace_dir();
+    sync_manifest(app, &config, &ws)?;
+
+    // Pick the corne halves out of build.yaml's matrix.
+    let entries = read_build_entries(&config)?;
+    let left = entries
+        .iter()
+        .find(|e| e.shield.contains("corne_left"))
+        .ok_or("No corne_left entry in build.yaml")?;
+    let right = entries
+        .iter()
+        .find(|e| e.shield.contains("corne_right"))
+        .ok_or("No corne_right entry in build.yaml")?;
+    let left_snips = snippets_for(&left.snippet);
+    let right_snips = snippets_for(&right.snippet);
+
     let out = ws.join("build");
     let src = ws.join("zmk").join("app");
     let zmk_config = format!("-DZMK_CONFIG={}", config.display());
@@ -595,12 +670,12 @@ fn managed_build(
     // already fans out across cores; running both overlaps their config phases.
     let (left_res, right_res) = std::thread::scope(|s| {
         let l = s.spawn(|| {
-            build_half(&ctx, &ws, &src, &left_dir, "corne_left nice_view_adapter nice_view",
-                       &["studio-rpc-usb-uart", "usb-dfu-reset"], &zmk_config, "left", "zmkay Corne Left")
+            build_half(&ctx, &ws, &src, &left_dir, &left.board, &left.shield,
+                       &left_snips, &zmk_config, "left", "zmkay Corne Left")
         });
         let r = s.spawn(|| {
-            build_half(&ctx, &ws, &src, &right_dir, "corne_right nice_view_adapter nice_view",
-                       &["usb-dfu-reset"], &zmk_config, "right", "zmkay Corne Right")
+            build_half(&ctx, &ws, &src, &right_dir, &right.board, &right.shield,
+                       &right_snips, &zmk_config, "right", "zmkay Corne Right")
         });
         (l.join(), r.join())
     });
@@ -627,6 +702,7 @@ fn build_half(
     ws: &Path,
     src: &Path,
     build_dir: &Path,
+    board: &str,
     shield: &str,
     snippets: &[&str],
     zmk_config: &str,
@@ -645,7 +721,7 @@ fn build_half(
     // left from right on connect (ZMK's serial number is static across units).
     let product_arg = format!("-DCONFIG_USB_DEVICE_PRODUCT=\"{usb_product}\"");
     let mut args: Vec<&str> = vec![
-        "build", "-s", &src_s, "-d", &build_s, "-b", "nice_nano_v2",
+        "build", "-s", &src_s, "-d", &build_s, "-b", board,
     ];
     for s in snippets {
         args.push("-S");

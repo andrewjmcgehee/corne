@@ -4,6 +4,7 @@ import { ConnectionBar } from "./ConnectionBar";
 import { FlashDialog } from "./FlashDialog";
 import { FlashBar } from "./FlashBar";
 import { BuildStatus } from "./BuildStatus";
+import { ErrorBoundary } from "./ErrorBoundary";
 import { BuildTab } from "./BuildTab";
 import { BehaviorsDialog } from "./BehaviorsDialog";
 import { BoardView } from "../editor/BoardView";
@@ -73,15 +74,17 @@ export function App() {
         {native && <FlashBar />}
 
         <main className="flex-1 min-h-0">
-          {tab === "build" ? (
-            <div className="h-full p-6">
-              <BuildTab />
-            </div>
-          ) : (
-            <div className="h-full overflow-auto p-8">
-              {status === "connected" ? <BoardView /> : <Welcome />}
-            </div>
-          )}
+          <ErrorBoundary>
+            {tab === "build" ? (
+              <div className="h-full p-6">
+                <BuildTab />
+              </div>
+            ) : (
+              <div className="h-full overflow-auto p-8">
+                {status === "connected" ? <BoardView /> : <Welcome />}
+              </div>
+            )}
+          </ErrorBoundary>
         </main>
       </div>
     </BrowserGuard>

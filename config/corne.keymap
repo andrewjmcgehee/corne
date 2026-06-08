@@ -19,7 +19,6 @@
 #include <dt-bindings/zmk/pointing.h>
 #include "helpers.h"
 
-
 HOME_ROW_MOD(hl, &kp, &kp, KEYS_R THUMBS) // left home row mods
 HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
 
@@ -29,7 +28,7 @@ HOME_ROW_MOD(hr, &kp, &kp, KEYS_L THUMBS) // right home row mods
       compatible = "zmk,behavior-hold-tap";
       #binding-cells = <2>;
       flavor = "balanced";
-      tapping-term-ms = <150>;
+      tapping-term-ms = <280>;
       quick-tap-ms = <120>;
       bindings = <&mo>, <&kp>;
     };

@@ -60,8 +60,6 @@
 #define THUMBS THUMBS_L THUMBS_R
 
 // behavior
-#define QUICK_TAP_MS 120
-
 #define ZMK_BEHAVIOR_CORE_hold_tap \
     compatible = "zmk,behavior-hold-tap"; \
     #binding-cells = <2>
@@ -80,6 +78,6 @@
 
 #define HOME_ROW_MOD(NAME, HOLD, TAP, TRIGGER_POS)                             \
   ZMK_HOLD_TAP(NAME, bindings = <HOLD>, <TAP>; flavor = "balanced";            \
-               tapping-term-ms = <280>; quick-tap-ms = <QUICK_TAP_MS>;         \
-               require-prior-idle-ms = <100>; hold-trigger-on-release;         \
+               tapping-term-ms = <280>; quick-tap-ms = <120>;         \
+               require-prior-idle-ms = <150>; hold-trigger-on-release;         \
                hold-trigger-key-positions = <TRIGGER_POS>;)

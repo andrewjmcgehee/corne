@@ -11,6 +11,6 @@ manifest:
       import: app/west.yml
     - name: nice-view-gem
       remote: andrewjmcgehee
-      revision: v0.3.0 # main targets LVGL 9 / newer ZMK; v0.3.0 matches ZMK v0.3
+      revision: main
   self:
     path: config
